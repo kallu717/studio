@@ -1,0 +1,33 @@
+// src/app/files/[id]/LogDetailView.tsx
+"use client";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import React from 'react';
+
+export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: string | null | undefined }) => {
+  let content;
+  if (jsonString === null || jsonString === undefined || jsonString.trim() === '' || jsonString.toLowerCase() === 'null') {
+    content = <pre className="text-muted-foreground">NULL</pre>;
+  } else {
+    try {
+      const parsed = JSON.parse(jsonString);
+      content = <pre className="whitespace-pre-wrap break-all">{JSON.stringify(parsed, null, 2)}</pre>;
+    } catch (e) {
+      content = <pre className="text-destructive-foreground bg-destructive p-2 rounded-md whitespace-pre-wrap break-all">{jsonString}</pre>;
+    }
+  }
+
+  return (
+    <Card className="flex-1 min-h-0 flex flex-col rounded-none border-0">
+      <CardHeader>
+        <CardTitle className="text-lg capitalize">{title.replace(/_/g, ' ')}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow min-h-0">
+        <ScrollArea className="h-full w-full rounded-md border p-4 font-mono text-sm">
+          {content}
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+};
