@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronsUpDown, Check, CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JsonPayloadViewer } from './JsonPayloadViewer';
+import { DifferenceListViewer } from './DifferenceListViewer';
 
 type LogRow = { [key: string]: string };
 
@@ -106,6 +107,16 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
         return Array.from(newSelected);
     });
   };
+
+  const renderDetailValue = (col: string, value: string) => {
+    if (col === 'difference_list') {
+      return <DifferenceListViewer jsonString={value} />;
+    }
+    if (isJsonLike(value)) {
+      return <JsonPayloadViewer jsonString={value} />;
+    }
+    return <span className="font-mono text-foreground break-all">{value || <span className="text-muted-foreground/60">NULL</span>}</span>;
+  }
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6 gap-6 bg-background">
@@ -211,11 +222,7 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                             <div key={col} className="flex flex-col">
                               <dt className="font-medium text-muted-foreground capitalize">{col.replace(/_/g, ' ')}</dt>
                               <dd className="mt-1">
-                                {isJsonLike(log[col]) ? (
-                                    <JsonPayloadViewer jsonString={log[col]} />
-                                ) : (
-                                    <span className="font-mono text-foreground break-all">{log[col] || <span className="text-muted-foreground/60">NULL</span>}</span>
-                                )}
+                                {renderDetailValue(col, log[col])}
                               </dd>
                             </div>
                           ))}
@@ -241,5 +248,3 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
     </div>
   );
 }
-
-    
