@@ -16,9 +16,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
 
 type LogRow = { [key: string]: any };
 
@@ -34,7 +41,12 @@ type Difference = {
   new_value: any;
 };
 
-const ValueDisplay = ({ value }: { value: any }) => {
+type EntityData = {
+    entity_id: string;
+    differences: Difference[];
+};
+
+const ValueDisplay = ({ value, isNew = false }: { value: any, isNew?: boolean }) => {
     if (value === null || value === undefined) {
         return <Badge variant="secondary">NULL</Badge>;
     }
@@ -47,80 +59,106 @@ const ValueDisplay = ({ value }: { value: any }) => {
     if (String(value).trim() === '') {
         return <Badge variant="secondary">EMPTY</Badge>
     }
-    return <span className="font-mono text-sm">{String(value)}</span>;
+    return <span className={`font-mono text-sm ${isNew ? 'font-semibold text-primary' : ''}`}>{String(value)}</span>;
 };
 
 
 export const LogDetailModal = ({ log, isOpen, onClose }: LogDetailModalProps) => {
-  const differences = useMemo((): Difference[] => {
-    if (!log || !log.difference_list) return [];
-    try {
-      if (typeof log.difference_list === 'string') {
-        // Handle cases where the value is the literal string "NULL" or an empty string
-        const trimmedList = log.difference_list.trim();
-        if (trimmedList === '' || trimmedList.toUpperCase() === 'NULL') {
-          return [];
-        }
-      }
+  const entities = useMemo((): EntityData[] => {
+    if (!log) return [];
 
-      // It might be a JSON string, or it could already be an object.
-      const rawDiffs = typeof log.difference_list === 'string'
-        ? JSON.parse(log.difference_list)
-        : log.difference_list;
-      
-      if (Array.isArray(rawDiffs)) {
-        return rawDiffs;
+    const action = log.action?.toLowerCase();
+
+    try {
+      if (action === 'create') {
+        const payload = typeof log.payload === 'string' ? JSON.parse(log.payload) : log.payload;
+        const payloadArray = Array.isArray(payload) ? payload : [payload];
+        
+        return payloadArray.map((entity: any, index: number) => ({
+            entity_id: entity.uuid || entity.id || `New Entity ${index + 1}`,
+            differences: Object.keys(entity).map(key => ({
+                field: key,
+                old_value: null,
+                new_value: entity[key]
+            }))
+        }));
+
+      } else { // Handles 'update', 'delete', and others
+        const diffList = typeof log.difference_list === 'string' 
+            ? (log.difference_list.trim() === '' || log.difference_list.toUpperCase() === 'NULL' ? [] : JSON.parse(log.difference_list))
+            : log.difference_list;
+
+        if (!Array.isArray(diffList) || diffList.length === 0) return [];
+
+        return [{
+            entity_id: log.uuid || log.entity_id || "Changed Entity",
+            differences: diffList
+        }];
       }
-      return [];
     } catch (error) {
-      console.error("Error parsing difference_list:", error);
+      console.error("Error parsing log data:", error);
       return [];
     }
   }, [log]);
 
   if (!log) return null;
+  
+  const actionDisplay = log.action ? log.action.charAt(0).toUpperCase() + log.action.slice(1) : 'Log';
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Log Details</DialogTitle>
+          <DialogTitle>{actionDisplay} Details</DialogTitle>
           <DialogDescription>
-            A detailed view of the changes for the selected log entry.
+            A detailed breakdown of the changes for the selected log entry.
           </DialogDescription>
         </DialogHeader>
         <div className="flex-grow min-h-0">
-            <ScrollArea className="h-full pr-6">
-                <Table>
-                    <TableHeader className="sticky top-0 bg-background">
-                        <TableRow>
-                        <TableHead className="w-[200px]">Field</TableHead>
-                        <TableHead>Old Value</TableHead>
-                        <TableHead>New Value</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {differences.length > 0 ? (
-                            differences.map((diff, index) => (
-                                <TableRow key={index}>
-                                    <TableCell className="font-semibold capitalize align-top">{diff.field.replace(/_/g, ' ')}</TableCell>
-                                    <TableCell className="align-top">
-                                        <ValueDisplay value={diff.old_value} />
-                                    </TableCell>
-                                    <TableCell className="align-top">
-                                        <ValueDisplay value={diff.new_value} />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                                    No difference list found or it is empty.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
+            <ScrollArea className="h-full pr-4">
+                {entities.length > 0 ? (
+                     <Accordion type="multiple" defaultValue={entities.length === 1 ? [entities[0].entity_id] : []} className="w-full">
+                        {entities.map((entity) => (
+                             <AccordionItem value={entity.entity_id} key={entity.entity_id}>
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="outline">{log.action?.toUpperCase()}</Badge>
+                                        <span className="font-semibold">{entity.entity_id}</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[200px]">Field</TableHead>
+                                                <TableHead>Value Change (Old → New)</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                        {entity.differences.map((diff, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell className="font-semibold capitalize align-top">{diff.field.replace(/_/g, ' ')}</TableCell>
+                                                <TableCell className="align-top">
+                                                    <div className="flex items-center gap-2">
+                                                        <ValueDisplay value={diff.old_value} />
+                                                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                                                        <ValueDisplay value={diff.new_value} isNew={true} />
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        </TableBody>
+                                    </Table>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                        No changes found to display.
+                    </div>
+                )}
             </ScrollArea>
         </div>
       </DialogContent>
