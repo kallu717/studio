@@ -1,3 +1,4 @@
+
 // src/app/files/[id]/LogDetailView.tsx
 "use client";
 
@@ -20,12 +21,12 @@ export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: st
 
   return (
     <Card className="flex flex-col h-full rounded-none border-0">
-      <CardHeader className="flex-shrink-0">
-        <CardTitle className="text-lg capitalize">{title.replace(/_/g, ' ')}</CardTitle>
+      <CardHeader className="flex-shrink-0 py-2 px-4 border-b">
+        <CardTitle className="text-base font-semibold capitalize">{title.replace(/_/g, ' ')}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow min-h-0 p-0">
         <ScrollArea className="h-full w-full">
-            <div className="p-4 font-mono text-sm border-t h-full">
+            <div className="p-4 font-mono text-sm">
               {content}
             </div>
         </ScrollArea>
@@ -33,3 +34,5 @@ export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: st
     </Card>
   );
 };
+
+    

@@ -486,7 +486,7 @@ export default function FileViewerPage() {
                             <ResizablePanel defaultSize={40} minSize={20} className="flex flex-col bg-muted/40">
                                 <div className="flex-grow min-h-0 flex">
                                     <div className="flex-1 basis-1/2 flex flex-col border-r">
-                                        <div className="p-4 border-b">
+                                        <div className="p-4 border-b flex-shrink-0">
                                             <Label htmlFor="left-column-select">Left Panel</Label>
                                             <Select value={leftColumn} onValueChange={setLeftColumn}>
                                                 <SelectTrigger id="left-column-select">
@@ -505,7 +505,7 @@ export default function FileViewerPage() {
                                         </div>
                                     </div>
                                     <div className="flex-1 basis-1/2 flex flex-col">
-                                        <div className="p-4 border-b">
+                                        <div className="p-4 border-b flex-shrink-0">
                                             <Label htmlFor="right-column-select">Right Panel</Label>
                                             <Select value={rightColumn} onValueChange={setRightColumn}>
                                                 <SelectTrigger id="right-column-select">
@@ -547,4 +547,5 @@ export default function FileViewerPage() {
             />
         </div>
     );
-}
+
+    
