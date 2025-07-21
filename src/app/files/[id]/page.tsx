@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -14,13 +13,12 @@ import Papa from 'papaparse';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable-panel';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { JsonBlock } from './LogDetailView';
 import { LogComparisonView } from './LogComparisonView';
 import { ColumnFilter, type FilterState } from './ColumnFilter';
 import { cn } from '@/lib/utils';
 import { LogDetailModal } from './LogDetailModal';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TimelineView } from './TimelineView';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -300,20 +298,35 @@ export default function FileViewerPage() {
                                 Compare Selections
                             </Button>
                         )}
-                         <Sheet>
-                            <SheetTrigger asChild>
+                         <Dialog>
+                            <DialogTrigger asChild>
                                 <Button variant="outline" size="sm" disabled={isLoading || isParsing || allLogs.length === 0}>
                                     <History className="mr-2 h-4 w-4"/>
                                     Timeline
                                 </Button>
-                            </SheetTrigger>
-                            <SheetContent className="w-full sm:max-w-full md:w-3/4 lg:w-2/3 xl:w-1/2 p-0">
-                                <SheetHeader className="p-6 pb-0">
-                                  <SheetTitle>Timeline View</SheetTitle>
-                                </SheetHeader>
-                                <TimelineView logs={filteredLogs} headers={headers} />
-                            </SheetContent>
-                        </Sheet>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-none w-auto max-h-[90vh] p-0 border-0 bg-transparent shadow-none">
+                                <ResizablePanelGroup direction="horizontal" className="min-w-[60vw] min-h-[80vh] bg-card rounded-lg border shadow-lg">
+                                    <ResizablePanel defaultSize={60}>
+                                        <div className="flex flex-col h-full">
+                                            <DialogHeader className="p-6 pb-2">
+                                              <DialogTitle>Timeline View</DialogTitle>
+                                            </DialogHeader>
+                                            <TimelineView logs={filteredLogs} headers={headers} />
+                                        </div>
+                                    </ResizablePanel>
+                                    <ResizableHandle withHandle />
+                                    <ResizablePanel defaultSize={40}>
+                                        <div className="p-6 h-full flex flex-col">
+                                            <h3 className="text-lg font-semibold mb-4">Details</h3>
+                                            <div className="flex-grow bg-muted rounded-md p-4">
+                                                <p className="text-muted-foreground">Select an item from the timeline to see details here.</p>
+                                            </div>
+                                        </div>
+                                    </ResizablePanel>
+                                </ResizablePanelGroup>
+                            </DialogContent>
+                        </Dialog>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                                 <span className="h-3 w-3 rounded-full bg-green-400/80"></span>
@@ -552,11 +565,3 @@ export default function FileViewerPage() {
             />
         </div>
     );
-
-    
-
-
-
-    
-
-    
