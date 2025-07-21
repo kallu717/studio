@@ -108,6 +108,14 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
         return Array.from(newSelected);
     });
   };
+  
+  const handleSelectAllIdentifiers = () => {
+    if (selectedIdentifiers.length === uniqueIdentifiers.length) {
+      setSelectedIdentifiers([]); // Deselect all
+    } else {
+      setSelectedIdentifiers(uniqueIdentifiers); // Select all
+    }
+  };
 
   const isJsonLike = (value: string | null | undefined): boolean => {
       if (!value) return false;
@@ -157,7 +165,7 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
             <Popover>
                 <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start font-normal" disabled={!identifierColumn}>
-                    {selectedIdentifiers.length > 0 ? `${selectedIdentifiers.length} selected` : "Select value(s)..."}
+                    {selectedIdentifiers.length > 0 ? `${selectedIdentifiers.length} of ${uniqueIdentifiers.length} selected` : "Select value(s)..."}
                 </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
@@ -166,6 +174,22 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                         <CommandList>
                            <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>
+                                {uniqueIdentifiers.length > 1 && (
+                                     <CommandItem
+                                        onSelect={handleSelectAllIdentifiers}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <Checkbox
+                                            id="select-all-identifiers"
+                                            checked={selectedIdentifiers.length === uniqueIdentifiers.length}
+                                            readOnly
+                                            className="h-4 w-4"
+                                        />
+                                        <label htmlFor="select-all-identifiers" className="cursor-pointer flex-grow font-semibold">
+                                            {selectedIdentifiers.length === uniqueIdentifiers.length ? "Deselect All" : "Select All"}
+                                        </label>
+                                    </CommandItem>
+                                )}
                                 {uniqueIdentifiers.map((id) => {
                                 const isSelected = selectedIdentifiers.includes(id);
                                 return (
@@ -175,14 +199,11 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                                         className="flex items-center gap-2"
                                     >
                                         <Checkbox
-                                            id={`select-id-${id}`}
                                             checked={isSelected}
+                                            readOnly
                                             className="h-4 w-4"
-                                            aria-labelledby={`label-id-${id}`}
                                         />
-                                        <label htmlFor={`select-id-${id}`} id={`label-id-${id}`} className="cursor-pointer flex-grow">
-                                            {id}
-                                        </label>
+                                        <span className="flex-grow">{id}</span>
                                     </CommandItem>
                                 );
                                 })}
@@ -229,17 +250,17 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                                     <CommandItem
                                         key={header}
                                         onSelect={() => handleDetailColumnSelect(header)}
-                                        className="flex items-center gap-2"
                                     >
-                                        <Checkbox
-                                            id={`select-col-${header}`}
-                                            checked={isSelected}
-                                            className="h-4 w-4"
-                                            aria-labelledby={`label-col-${header}`}
-                                        />
-                                        <label htmlFor={`select-col-${header}`} id={`label-col-${header}`} className="cursor-pointer flex-grow">
-                                            {header.replace(/_/g, ' ')}
-                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={isSelected}
+                                                readOnly
+                                                className="h-4 w-4"
+                                            />
+                                            <span className="cursor-pointer flex-grow">
+                                                {header.replace(/_/g, ' ')}
+                                            </span>
+                                        </div>
                                     </CommandItem>
                                 );
                                 })}
