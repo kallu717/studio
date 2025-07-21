@@ -19,13 +19,15 @@ export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: st
   }
 
   return (
-    <Card className="flex-1 min-h-0 flex flex-col rounded-none border-0">
+    <Card className="flex-1 min-h-0 flex flex-col rounded-none border-0 h-full">
       <CardHeader>
         <CardTitle className="text-lg capitalize">{title.replace(/_/g, ' ')}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-grow min-h-0">
-        <ScrollArea className="h-full w-full rounded-md border p-4 font-mono text-sm">
-          {content}
+      <CardContent className="flex-grow min-h-0 p-0">
+        <ScrollArea className="h-full w-full">
+            <div className="p-4 font-mono text-sm border-t">
+              {content}
+            </div>
         </ScrollArea>
       </CardContent>
     </Card>
