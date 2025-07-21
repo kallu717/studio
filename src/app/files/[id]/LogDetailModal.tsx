@@ -56,9 +56,17 @@ export const LogDetailModal = ({ log, isOpen, onClose }: LogDetailModalProps) =>
   const differences = useMemo((): Difference[] => {
     if (!log || !log.difference_list) return [];
     try {
+      if (typeof log.difference_list === 'string') {
+        // Handle cases where the value is the literal string "NULL" or an empty string
+        const trimmedList = log.difference_list.trim();
+        if (trimmedList === '' || trimmedList.toUpperCase() === 'NULL') {
+          return [];
+        }
+      }
+
       // It might be a JSON string, or it could already be an object.
-      const rawDiffs = typeof log.difference_list === 'string' 
-        ? JSON.parse(log.difference_list) 
+      const rawDiffs = typeof log.difference_list === 'string'
+        ? JSON.parse(log.difference_list)
         : log.difference_list;
       
       if (Array.isArray(rawDiffs)) {
