@@ -1,3 +1,4 @@
+
 // src/app/files/[id]/LogDetailModal.tsx
 "use client";
 
