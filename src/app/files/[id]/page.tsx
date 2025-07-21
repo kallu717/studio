@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle, Eye } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Papa from 'papaparse';
@@ -20,6 +20,7 @@ import { JsonBlock } from './LogDetailView';
 import { LogComparisonView } from './LogComparisonView';
 import { ColumnFilter, type FilterState } from './ColumnFilter';
 import { cn } from '@/lib/utils';
+import { LogDetailModal } from './LogDetailModal';
 
 type LogRow = { [key: string]: string };
 
@@ -41,6 +42,9 @@ export default function FileViewerPage() {
     const [rightColumn, setRightColumn] = useState<string>('payload');
     const [isCompareOpen, setIsCompareOpen] = useState(false);
     
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedLogForModal, setSelectedLogForModal] = useState<LogRow | null>(null);
+
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(ROWS_PER_PAGE_OPTIONS[0]);
 
@@ -210,6 +214,12 @@ export default function FileViewerPage() {
         setSelectedRows(newSelectedRows);
     };
 
+    const handleViewClick = (e: React.MouseEvent, log: LogRow) => {
+        e.stopPropagation();
+        setSelectedLogForModal(log);
+        setIsModalOpen(true);
+    };
+
     const numSelected = selectedRows.size;
     
     const isAllOnPageSelected = paginatedLogs.length > 0 && paginatedLogs.every((_, index) => selectedRows.has(getGlobalIndex(index)));
@@ -338,6 +348,7 @@ export default function FileViewerPage() {
                                                         </div>
                                                     </TableHead>
                                                 ))}
+                                                <TableHead className="w-20 text-center">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -368,12 +379,18 @@ export default function FileViewerPage() {
                                                                 {log[header]}
                                                             </TableCell>
                                                         ))}
+                                                        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleViewClick(e, log)}>
+                                                                <Eye className="h-4 w-4" />
+                                                                <span className="sr-only">View Details</span>
+                                                            </Button>
+                                                        </TableCell>
                                                     </TableRow>
                                                 )
                                             })}
                                             {!paginatedLogs.length && (
                                                 <TableRow>
-                                                    <TableCell colSpan={headers.length + 2} className="text-center py-10 text-muted-foreground">
+                                                    <TableCell colSpan={headers.length + 3} className="text-center py-10 text-muted-foreground">
                                                         {hasActiveFilters ? "No logs match the current filters." : "The file is empty."}
                                                     </TableCell>
                                                 </TableRow>
@@ -497,6 +514,11 @@ export default function FileViewerPage() {
                     />
                 </DialogContent>
             </Dialog>
+            <LogDetailModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                log={selectedLogForModal}
+            />
         </div>
     );
 }
