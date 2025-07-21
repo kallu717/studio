@@ -175,19 +175,19 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                            <CommandEmpty>No results found.</CommandEmpty>
                             <CommandGroup>
                                 {uniqueIdentifiers.length > 1 && (
-                                     <CommandItem
+                                    <CommandItem
                                         onSelect={handleSelectAllIdentifiers}
-                                        className="flex items-center gap-2"
                                     >
-                                        <Checkbox
-                                            id="select-all-identifiers"
-                                            checked={selectedIdentifiers.length === uniqueIdentifiers.length}
-                                            readOnly
-                                            className="h-4 w-4"
-                                        />
-                                        <label htmlFor="select-all-identifiers" className="cursor-pointer flex-grow font-semibold">
-                                            {selectedIdentifiers.length === uniqueIdentifiers.length ? "Deselect All" : "Select All"}
-                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={selectedIdentifiers.length === uniqueIdentifiers.length}
+                                                readOnly
+                                                className="h-4 w-4"
+                                            />
+                                            <span className="font-semibold">
+                                                {selectedIdentifiers.length === uniqueIdentifiers.length ? "Deselect All" : "Select All"}
+                                            </span>
+                                        </div>
                                     </CommandItem>
                                 )}
                                 {uniqueIdentifiers.map((id) => {
@@ -196,14 +196,15 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                                     <CommandItem
                                         key={id}
                                         onSelect={() => handleIdentifierValueSelect(id)}
-                                        className="flex items-center gap-2"
                                     >
-                                        <Checkbox
-                                            checked={isSelected}
-                                            readOnly
-                                            className="h-4 w-4"
-                                        />
-                                        <span className="flex-grow">{id}</span>
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={isSelected}
+                                                readOnly
+                                                className="h-4 w-4"
+                                            />
+                                            <span>{id}</span>
+                                        </div>
                                     </CommandItem>
                                 );
                                 })}
@@ -257,7 +258,7 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                                                 readOnly
                                                 className="h-4 w-4"
                                             />
-                                            <span className="cursor-pointer flex-grow">
+                                            <span className="flex-grow">
                                                 {header.replace(/_/g, ' ')}
                                             </span>
                                         </div>
