@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle, Eye } from 'lucide-react';
+import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle, Eye, History } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Papa from 'papaparse';
@@ -21,6 +21,9 @@ import { LogComparisonView } from './LogComparisonView';
 import { ColumnFilter, type FilterState } from './ColumnFilter';
 import { cn } from '@/lib/utils';
 import { LogDetailModal } from './LogDetailModal';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { TimelineView } from './TimelineView';
+
 
 type LogRow = { [key: string]: string };
 
@@ -95,9 +98,14 @@ export default function FileViewerPage() {
     const getGlobalIndex = useCallback((localIndex: number): number => {
         const logToFind = paginatedLogs[localIndex];
         if (!logToFind) return -1;
-        const globalLogIndex = allLogs.findIndex(log => log === logToFind);
-        return globalLogIndex;
-    }, [paginatedLogs, allLogs]);
+        // Use a more robust way to find the index, especially with identical rows
+        const paginatedLogGlobalIndex = (currentPage - 1) * rowsPerPage + localIndex;
+        if (filteredLogs[paginatedLogGlobalIndex] === logToFind) {
+            const globalIndex = allLogs.indexOf(logToFind);
+            return globalIndex;
+        }
+        return allLogs.findIndex(log => log === logToFind);
+    }, [paginatedLogs, allLogs, currentPage, rowsPerPage, filteredLogs]);
 
 
     useEffect(() => {
@@ -222,8 +230,15 @@ export default function FileViewerPage() {
 
     const numSelected = selectedRows.size;
     
-    const isAllOnPageSelected = paginatedLogs.length > 0 && paginatedLogs.every((_, index) => selectedRows.has(getGlobalIndex(index)));
-    const isSomeOnPageSelected = !isAllOnPageSelected && paginatedLogs.some((_, index) => selectedRows.has(getGlobalIndex(index)));
+    const isAllOnPageSelected = paginatedLogs.length > 0 && paginatedLogs.every((_, index) => {
+        const globalIndex = getGlobalIndex(index);
+        return globalIndex !== -1 && selectedRows.has(globalIndex);
+    });
+
+    const isSomeOnPageSelected = !isAllOnPageSelected && paginatedLogs.some((_, index) => {
+        const globalIndex = getGlobalIndex(index);
+        return globalIndex !== -1 && selectedRows.has(globalIndex);
+    });
     
     const showDetailView = numSelected === 1;
     const selectedLogIndex = showDetailView ? selectedRows.values().next().value : null;
@@ -285,6 +300,17 @@ export default function FileViewerPage() {
                                 Compare Selections
                             </Button>
                         )}
+                         <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="sm" disabled={isLoading || isParsing || allLogs.length === 0}>
+                                    <History className="mr-2 h-4 w-4"/>
+                                    Timeline
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent className="w-full sm:max-w-full md:w-3/4 lg:w-2/3 xl:w-1/2 p-0">
+                                <TimelineView logs={filteredLogs} headers={headers} />
+                            </SheetContent>
+                        </Sheet>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                                 <span className="h-3 w-3 rounded-full bg-green-400/80"></span>
@@ -354,10 +380,10 @@ export default function FileViewerPage() {
                                         <TableBody>
                                             {paginatedLogs.map((log, index) => {
                                                 const globalIndex = getGlobalIndex(index);
-                                                const isSelected = selectedRows.has(globalIndex);
+                                                const isSelected = globalIndex !== -1 && selectedRows.has(globalIndex);
                                                 return (
                                                     <TableRow
-                                                        key={globalIndex}
+                                                        key={globalIndex === -1 ? `fallback-${index}`: globalIndex}
                                                         data-state={isSelected ? 'selected' : undefined}
                                                         className={cn("cursor-pointer", getRowClass(log))}
                                                         onClick={() => handleRowClick(index)}
@@ -522,5 +548,3 @@ export default function FileViewerPage() {
         </div>
     );
 }
-
-    
