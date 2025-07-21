@@ -7,25 +7,27 @@ import React from 'react';
 
 export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: string | null | undefined }) => {
   let content;
-  if (jsonString === null || jsonString === undefined || jsonString.trim() === '' || jsonString.toLowerCase() === 'null') {
+  if (jsonString === null || jsonString === undefined || String(jsonString).trim() === '' || String(jsonString).toLowerCase() === 'null') {
     content = <pre className="text-muted-foreground">NULL</pre>;
   } else {
     try {
       const parsed = JSON.parse(jsonString);
       content = <pre className="whitespace-pre-wrap break-all">{JSON.stringify(parsed, null, 2)}</pre>;
     } catch (e) {
-      content = <pre className="text-destructive-foreground bg-destructive p-2 rounded-md whitespace-pre-wrap break-all">{jsonString}</pre>;
+      // If parsing fails, display the original string but handle potential errors.
+      // This is safer than showing a destructive color for non-JSON strings that are valid.
+      content = <pre className="whitespace-pre-wrap break-all">{jsonString}</pre>;
     }
   }
 
   return (
     <Card className="flex flex-col h-full rounded-none border-0">
-      <CardHeader>
+      <CardHeader className="flex-shrink-0">
         <CardTitle className="text-lg capitalize">{title.replace(/_/g, ' ')}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow min-h-0 p-0">
         <ScrollArea className="h-full w-full">
-            <div className="p-4 font-mono text-sm border-t">
+            <div className="p-4 font-mono text-sm border-t h-full">
               {content}
             </div>
         </ScrollArea>
