@@ -41,7 +41,7 @@ export const DifferenceListViewer = ({ jsonString }: DifferenceListViewerProps) 
   let differences: Difference[] = [];
   let error = null;
 
-  if (jsonString && typeof jsonString === 'string') {
+  if (jsonString && typeof jsonString === 'string' && jsonString.trim() !== '' && jsonString.toUpperCase() !== 'NULL') {
     try {
       const parsed = JSON.parse(jsonString);
       if (Array.isArray(parsed)) {
