@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronsUpDown, CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { JsonPayloadViewer } from './JsonPayloadViewer';
 
 type LogRow = { [key: string]: string };
 
@@ -55,7 +56,8 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
 
     // Set a default detail column if available
     if (headers.length > 1) {
-        setDetailColumns([headers.find(h => h !== defaultDateCol && h !== defaultIdCol) || headers[1]]);
+        const defaultDetailCols = headers.filter(h => h !== defaultDateCol && h !== defaultIdCol);
+        setDetailColumns(defaultDetailCols.length > 0 ? [defaultDetailCols[0]] : [headers[0]]);
     } else if (headers.length > 0) {
         setDetailColumns([headers[0]]);
     }
@@ -85,6 +87,12 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
   const handleIdentifierChange = (value: string) => {
       setIdentifierColumn(value);
       setSelectedIdentifier(''); // Reset selected ID when column changes
+  }
+  
+  const isJsonLike = (value: string | null | undefined): boolean => {
+      if (!value) return false;
+      const trimmed = value.trim();
+      return (trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'));
   }
 
   return (
@@ -186,11 +194,17 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                         <CardTitle className="text-base font-semibold">{formatDate(log[dateColumn])}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-sm">
+                        <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 text-sm">
                           {detailColumns.map(col => (
                             <div key={col} className="flex flex-col">
                               <dt className="font-medium text-muted-foreground capitalize">{col.replace(/_/g, ' ')}</dt>
-                              <dd className="font-mono text-foreground break-all">{log[col] || <span className="text-muted-foreground/60">NULL</span>}</dd>
+                              <dd className="mt-1">
+                                {isJsonLike(log[col]) ? (
+                                    <JsonPayloadViewer jsonString={log[col]} />
+                                ) : (
+                                    <span className="font-mono text-foreground break-all">{log[col] || <span className="text-muted-foreground/60">NULL</span>}</span>
+                                )}
+                              </dd>
                             </div>
                           ))}
                         </dl>
