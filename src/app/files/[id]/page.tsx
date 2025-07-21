@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -14,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable-panel';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { JsonBlock } from './LogDetailView';
 import { LogComparisonView } from './LogComparisonView';
 import { ColumnFilter, type FilterState } from './ColumnFilter';
@@ -298,35 +300,20 @@ export default function FileViewerPage() {
                                 Compare Selections
                             </Button>
                         )}
-                         <Dialog>
-                            <DialogTrigger asChild>
+                         <Sheet>
+                            <SheetTrigger asChild>
                                 <Button variant="outline" size="sm" disabled={isLoading || isParsing || allLogs.length === 0}>
                                     <History className="mr-2 h-4 w-4"/>
                                     Timeline
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-none w-auto max-h-[90vh] p-0 border-0 bg-transparent shadow-none">
-                                <ResizablePanelGroup direction="horizontal" className="min-w-[60vw] min-h-[80vh] bg-card rounded-lg border shadow-lg">
-                                    <ResizablePanel defaultSize={60}>
-                                        <div className="flex flex-col h-full">
-                                            <DialogHeader className="p-6 pb-2">
-                                              <DialogTitle>Timeline View</DialogTitle>
-                                            </DialogHeader>
-                                            <TimelineView logs={filteredLogs} headers={headers} />
-                                        </div>
-                                    </ResizablePanel>
-                                    <ResizableHandle withHandle />
-                                    <ResizablePanel defaultSize={40}>
-                                        <div className="p-6 h-full flex flex-col">
-                                            <h3 className="text-lg font-semibold mb-4">Details</h3>
-                                            <div className="flex-grow bg-muted rounded-md p-4">
-                                                <p className="text-muted-foreground">Select an item from the timeline to see details here.</p>
-                                            </div>
-                                        </div>
-                                    </ResizablePanel>
-                                </ResizablePanelGroup>
-                            </DialogContent>
-                        </Dialog>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="!max-w-screen-lg w-full p-0 flex flex-col">
+                                <SheetHeader className="p-4 border-b">
+                                  <SheetTitle>Timeline View</SheetTitle>
+                                </SheetHeader>
+                                <TimelineView logs={filteredLogs} headers={headers} />
+                            </SheetContent>
+                        </Sheet>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                                 <span className="h-3 w-3 rounded-full bg-green-400/80"></span>
@@ -349,23 +336,23 @@ export default function FileViewerPage() {
                  <ResizablePanelGroup direction="vertical" className="flex-grow min-h-0">
                     <ResizablePanel defaultSize={showDetailView ? 60 : 100}>
                         <div className="flex flex-col h-full">
-                            <div className="flex-grow min-h-0">
-                                {error ? (
-                                     <Alert variant="destructive" className="my-4 mx-6">
-                                        <Terminal className="h-4 w-4" />
-                                        <AlertTitle>Error Loading File</AlertTitle>
-                                        <AlertDescription>
-                                            <p>{error}</p>
-                                        </AlertDescription>
-                                    </Alert>
-                                ) : isLoading || isParsing ? (
-                                     <div className="w-full h-full flex flex-col justify-center items-center space-y-4">
-                                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                                        <span className="text-lg text-muted-foreground">
-                                            {isLoading ? 'Loading file info...' : 'Parsing file, please wait...'}
-                                        </span>
-                                    </div>
-                                ) : (
+                            {error ? (
+                                 <Alert variant="destructive" className="my-4 mx-6">
+                                    <Terminal className="h-4 w-4" />
+                                    <AlertTitle>Error Loading File</AlertTitle>
+                                    <AlertDescription>
+                                        <p>{error}</p>
+                                    </AlertDescription>
+                                </Alert>
+                            ) : isLoading || isParsing ? (
+                                 <div className="w-full h-full flex flex-col justify-center items-center space-y-4">
+                                    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                                    <span className="text-lg text-muted-foreground">
+                                        {isLoading ? 'Loading file info...' : 'Parsing file, please wait...'}
+                                    </span>
+                                </div>
+                            ) : (
+                                <div className="flex-grow min-h-0">
                                     <ScrollArea className="h-full">
                                         <Table>
                                             <TableHeader className="sticky top-0 bg-background z-10">
@@ -441,8 +428,8 @@ export default function FileViewerPage() {
                                             </TableBody>
                                         </Table>
                                     </ScrollArea>
-                                )}
-                            </div>
+                                </div>
+                            )}
                              {!isLoading && !isParsing && allLogs.length > 0 && (
                                 <div className="flex-shrink-0 flex items-center justify-between border-t py-2 px-4">
                                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -515,12 +502,10 @@ export default function FileViewerPage() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <div className="flex-grow min-h-0">
-                                            <JsonBlock
-                                                title={leftColumn}
-                                                jsonString={selectedLog?.[leftColumn]}
-                                            />
-                                        </div>
+                                        <JsonBlock
+                                            title={leftColumn}
+                                            jsonString={selectedLog?.[leftColumn]}
+                                        />
                                     </div>
                                     <div className="flex-1 basis-1/2 flex flex-col">
                                         <div className="p-4 border-b flex-shrink-0">
@@ -534,12 +519,10 @@ export default function FileViewerPage() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                         <div className="flex-grow min-h-0">
-                                            <JsonBlock
-                                                title={rightColumn}
-                                                jsonString={selectedLog?.[rightColumn]}
-                                            />
-                                        </div>
+                                         <JsonBlock
+                                            title={rightColumn}
+                                            jsonString={selectedLog?.[rightColumn]}
+                                        />
                                     </div>
                                 </div>
                             </ResizablePanel>
@@ -565,3 +548,5 @@ export default function FileViewerPage() {
             />
         </div>
     );
+
+    
