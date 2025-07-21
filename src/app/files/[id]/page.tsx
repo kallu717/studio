@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { LogDetailModal } from './LogDetailModal';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { TimelineView } from './TimelineView';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 type LogRow = { [key: string]: string };
@@ -332,8 +333,8 @@ export default function FileViewerPage() {
             <main className="flex-grow flex flex-col min-h-0">
                  <ResizablePanelGroup direction="vertical" className="flex-grow min-h-0">
                     <ResizablePanel defaultSize={showDetailView ? 60 : 100}>
-                        <Card className="shadow-md flex-grow flex flex-col min-h-0 h-full rounded-none border-0 border-b">
-                            <CardContent className="flex-grow p-0 h-full overflow-y-auto">
+                        <div className="flex flex-col h-full">
+                            <div className="flex-grow min-h-0">
                                 {error ? (
                                      <Alert variant="destructive" className="my-4 mx-6">
                                         <Terminal className="h-4 w-4" />
@@ -350,83 +351,85 @@ export default function FileViewerPage() {
                                         </span>
                                     </div>
                                 ) : (
-                                    <Table>
-                                        <TableHeader className="sticky top-0 bg-background z-10">
-                                            <TableRow>
-                                                <TableHead className="w-16">
-                                                    <Checkbox
-                                                        checked={isAllOnPageSelected ? true : (isSomeOnPageSelected ? 'indeterminate' : false)}
-                                                        onCheckedChange={handleSelectAll}
-                                                        aria-label="Select all rows on this page"
-                                                        disabled={paginatedLogs.length === 0}
-                                                    />
-                                                </TableHead>
-                                                <TableHead className="w-20 font-mono">#</TableHead>
-                                                {headers.map((header) => (
-                                                    <TableHead key={header} className="capitalize">
-                                                        <div className="flex items-center gap-2">
-                                                            {header.replace(/_/g, ' ')}
-                                                            <ColumnFilter 
-                                                                header={header}
-                                                                filter={filters[header]}
-                                                                setFilter={setColumnFilter}
-                                                            />
-                                                        </div>
+                                    <ScrollArea className="h-full">
+                                        <Table>
+                                            <TableHeader className="sticky top-0 bg-background z-10">
+                                                <TableRow>
+                                                    <TableHead className="w-16">
+                                                        <Checkbox
+                                                            checked={isAllOnPageSelected ? true : (isSomeOnPageSelected ? 'indeterminate' : false)}
+                                                            onCheckedChange={handleSelectAll}
+                                                            aria-label="Select all rows on this page"
+                                                            disabled={paginatedLogs.length === 0}
+                                                        />
                                                     </TableHead>
-                                                ))}
-                                                <TableHead className="w-20 text-center">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {paginatedLogs.map((log, index) => {
-                                                const globalIndex = getGlobalIndex(index);
-                                                const isSelected = globalIndex !== -1 && selectedRows.has(globalIndex);
-                                                return (
-                                                    <TableRow
-                                                        key={globalIndex === -1 ? `fallback-${index}`: globalIndex}
-                                                        data-state={isSelected ? 'selected' : undefined}
-                                                        className={cn("cursor-pointer", getRowClass(log))}
-                                                        onClick={() => handleRowClick(index)}
-                                                    >
-                                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                                            <Checkbox
-                                                                checked={isSelected}
-                                                                onCheckedChange={(checked) => handleRowSelect(index, !!checked)}
-                                                                aria-label={`Select row ${globalIndex + 1}`}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell className="font-mono text-muted-foreground">{globalIndex + 1}</TableCell>
-                                                        {headers.map((header) => (
-                                                            <TableCell 
-                                                                key={`${globalIndex}-${header}`} 
-                                                                className="truncate font-mono max-w-xs"
-                                                                title={log[header]}
-                                                            >
-                                                                {log[header]}
+                                                    <TableHead className="w-20 font-mono">#</TableHead>
+                                                    {headers.map((header) => (
+                                                        <TableHead key={header} className="capitalize">
+                                                            <div className="flex items-center gap-2">
+                                                                {header.replace(/_/g, ' ')}
+                                                                <ColumnFilter 
+                                                                    header={header}
+                                                                    filter={filters[header]}
+                                                                    setFilter={setColumnFilter}
+                                                                />
+                                                            </div>
+                                                        </TableHead>
+                                                    ))}
+                                                    <TableHead className="w-20 text-center">Actions</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {paginatedLogs.map((log, index) => {
+                                                    const globalIndex = getGlobalIndex(index);
+                                                    const isSelected = globalIndex !== -1 && selectedRows.has(globalIndex);
+                                                    return (
+                                                        <TableRow
+                                                            key={globalIndex === -1 ? `fallback-${index}`: globalIndex}
+                                                            data-state={isSelected ? 'selected' : undefined}
+                                                            className={cn("cursor-pointer", getRowClass(log))}
+                                                            onClick={() => handleRowClick(index)}
+                                                        >
+                                                            <TableCell onClick={(e) => e.stopPropagation()}>
+                                                                <Checkbox
+                                                                    checked={isSelected}
+                                                                    onCheckedChange={(checked) => handleRowSelect(index, !!checked)}
+                                                                    aria-label={`Select row ${globalIndex + 1}`}
+                                                                />
                                                             </TableCell>
-                                                        ))}
-                                                        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleViewClick(e, log)}>
-                                                                <Eye className="h-4 w-4" />
-                                                                <span className="sr-only">View Details</span>
-                                                            </Button>
+                                                            <TableCell className="font-mono text-muted-foreground">{globalIndex + 1}</TableCell>
+                                                            {headers.map((header) => (
+                                                                <TableCell 
+                                                                    key={`${globalIndex}-${header}`} 
+                                                                    className="truncate font-mono max-w-xs"
+                                                                    title={log[header]}
+                                                                >
+                                                                    {log[header]}
+                                                                </TableCell>
+                                                            ))}
+                                                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleViewClick(e, log)}>
+                                                                    <Eye className="h-4 w-4" />
+                                                                    <span className="sr-only">View Details</span>
+                                                                </Button>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )
+                                                })}
+                                                {!paginatedLogs.length && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={headers.length + 3} className="text-center py-10 text-muted-foreground">
+                                                            {hasActiveFilters ? "No logs match the current filters." : "The file is empty."}
                                                         </TableCell>
                                                     </TableRow>
-                                                )
-                                            })}
-                                            {!paginatedLogs.length && (
-                                                <TableRow>
-                                                    <TableCell colSpan={headers.length + 3} className="text-center py-10 text-muted-foreground">
-                                                        {hasActiveFilters ? "No logs match the current filters." : "The file is empty."}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </ScrollArea>
                                 )}
-                            </CardContent>
-                            {!isLoading && !isParsing && allLogs.length > 0 && (
-                                <CardFooter className="flex items-center justify-between border-t py-2 px-4 flex-shrink-0">
+                            </div>
+                             {!isLoading && !isParsing && allLogs.length > 0 && (
+                                <div className="flex-shrink-0 flex items-center justify-between border-t py-2 px-4">
                                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
                                        <div className="flex items-center gap-2">
                                           <Label htmlFor="rows-per-page">Rows per page</Label>
@@ -476,9 +479,9 @@ export default function FileViewerPage() {
                                           </Button>
                                         </div>
                                      </div>
-                                </CardFooter>
+                                </div>
                             )}
-                        </Card>
+                        </div>
                     </ResizablePanel>
                     {showDetailView && (
                         <>
@@ -549,3 +552,4 @@ export default function FileViewerPage() {
     );
 
     
+
