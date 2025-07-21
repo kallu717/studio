@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronsUpDown, CheckIcon } from "lucide-react";
+import { ChevronsUpDown, Check, CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { JsonPayloadViewer } from './JsonPayloadViewer';
 
@@ -94,6 +94,18 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
       const trimmed = value.trim();
       return (trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'));
   }
+  
+  const handleDetailColumnSelect = (header: string) => {
+    setDetailColumns(prev => {
+        const newSelected = new Set(prev);
+        if (newSelected.has(header)) {
+            newSelected.delete(header);
+        } else {
+            newSelected.add(header);
+        }
+        return Array.from(newSelected);
+    });
+  };
 
   return (
     <div className="flex flex-col h-full p-4 md:p-6 gap-6 bg-background">
@@ -155,18 +167,18 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
                                 return (
                                     <CommandItem
                                         key={header}
-                                        onSelect={() => {
-                                            if (isSelected) {
-                                                setDetailColumns(detailColumns.filter((h) => h !== header));
-                                            } else {
-                                                setDetailColumns([...detailColumns, header]);
-                                            }
-                                        }}
+                                        onSelect={() => handleDetailColumnSelect(header)}
+                                        className="flex items-center gap-2"
                                     >
-                                    <div className={cn( "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary", isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible")}>
-                                        <CheckIcon className="h-4 w-4" />
-                                    </div>
-                                    <span>{header}</span>
+                                        <Checkbox
+                                            id={`select-${header}`}
+                                            checked={isSelected}
+                                            className="h-4 w-4"
+                                            aria-labelledby={`label-${header}`}
+                                        />
+                                        <label htmlFor={`select-${header}`} id={`label-${header}`} className="cursor-pointer flex-grow">
+                                            {header}
+                                        </label>
                                     </CommandItem>
                                 );
                                 })}
