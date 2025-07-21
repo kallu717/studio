@@ -308,6 +308,9 @@ export default function FileViewerPage() {
                                 </Button>
                             </SheetTrigger>
                             <SheetContent className="w-full sm:max-w-full md:w-3/4 lg:w-2/3 xl:w-1/2 p-0">
+                                <SheetHeader className="p-6 pb-0">
+                                  <SheetTitle>Timeline View</SheetTitle>
+                                </SheetHeader>
                                 <TimelineView logs={filteredLogs} headers={headers} />
                             </SheetContent>
                         </Sheet>
@@ -553,5 +556,7 @@ export default function FileViewerPage() {
     
 
 
+
+    
 
     

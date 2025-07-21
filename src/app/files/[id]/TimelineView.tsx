@@ -110,7 +110,7 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
   return (
     <div className="flex flex-col h-full p-4 md:p-6 gap-6 bg-background">
       <div className="flex-shrink-0">
-        <h2 className="text-2xl font-bold">Timeline View</h2>
+        
         <p className="text-muted-foreground">Visualize your data over time for a specific item.</p>
       </div>
 
@@ -241,3 +241,5 @@ export function TimelineView({ logs, headers }: TimelineViewProps) {
     </div>
   );
 }
+
+    
