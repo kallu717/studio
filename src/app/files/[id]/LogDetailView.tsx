@@ -14,8 +14,6 @@ export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: st
       const parsed = JSON.parse(jsonString);
       content = <pre className="whitespace-pre-wrap break-all">{JSON.stringify(parsed, null, 2)}</pre>;
     } catch (e) {
-      // If parsing fails, display the original string but handle potential errors.
-      // This is safer than showing a destructive color for non-JSON strings that are valid.
       content = <pre className="whitespace-pre-wrap break-all">{jsonString}</pre>;
     }
   }
