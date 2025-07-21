@@ -19,7 +19,7 @@ export const JsonBlock = ({ title, jsonString }: { title: string, jsonString: st
   }
 
   return (
-    <Card className="flex-1 min-h-0 flex flex-col rounded-none border-0 h-full">
+    <Card className="flex flex-col h-full rounded-none border-0">
       <CardHeader>
         <CardTitle className="text-lg capitalize">{title.replace(/_/g, ' ')}</CardTitle>
       </CardHeader>
