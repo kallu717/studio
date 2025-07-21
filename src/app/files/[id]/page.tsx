@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle, Eye, History } from 'lucide-react';
+import { ArrowLeft, Terminal, Loader2, Wand, ChevronLeft, ChevronRight, XCircle, Eye, History, GripVertical } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import Papa from 'papaparse';
@@ -28,6 +28,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 type LogRow = { [key: string]: string };
 
 const ROWS_PER_PAGE_OPTIONS = [20, 50, 100, 200];
+const DEFAULT_TIMELINE_WIDTH = 1024; // Default width in pixels, lg screen width
+const MIN_TIMELINE_WIDTH = 480; // Minimum width in pixels
 
 export default function FileViewerPage() {
     const params = useParams();
@@ -53,6 +55,39 @@ export default function FileViewerPage() {
 
     const [filters, setFilters] = useState<Record<string, FilterState>>({});
     
+    const [timelineWidth, setTimelineWidth] = useState(DEFAULT_TIMELINE_WIDTH);
+    const isResizingTimeline = useRef(false);
+
+    const handleTimelineResizeStart = (e: React.MouseEvent) => {
+        isResizingTimeline.current = true;
+        document.body.style.cursor = 'ew-resize';
+        document.body.style.userSelect = 'none';
+    };
+
+    const handleTimelineResizeMove = useCallback((e: MouseEvent) => {
+        if (!isResizingTimeline.current) return;
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth >= MIN_TIMELINE_WIDTH) {
+            setTimelineWidth(newWidth);
+        }
+    }, []);
+
+    const handleTimelineResizeEnd = useCallback(() => {
+        isResizingTimeline.current = false;
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+    }, []);
+    
+    useEffect(() => {
+        document.addEventListener('mousemove', handleTimelineResizeMove);
+        document.addEventListener('mouseup', handleTimelineResizeEnd);
+
+        return () => {
+            document.removeEventListener('mousemove', handleTimelineResizeMove);
+            document.removeEventListener('mouseup', handleTimelineResizeEnd);
+        };
+    }, [handleTimelineResizeMove, handleTimelineResizeEnd]);
+
     const setColumnFilter = useCallback((header: string, filter: FilterState | undefined) => {
         setFilters(prev => {
             const newFilters = { ...prev };
@@ -307,7 +342,17 @@ export default function FileViewerPage() {
                                     Timeline
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="right" className="!max-w-screen-lg w-full p-0 flex flex-col">
+                            <SheetContent 
+                                side="right" 
+                                className="!max-w-none p-0 flex flex-col"
+                                style={{ width: `${timelineWidth}px` }}
+                            >
+                                <div
+                                    onMouseDown={handleTimelineResizeStart}
+                                    className="absolute top-0 left-0 h-full w-2 cursor-ew-resize flex items-center justify-center group"
+                                >
+                                    <div className="w-0.5 h-8 bg-border rounded-full group-hover:bg-primary transition-colors" />
+                                </div>
                                 <SheetHeader className="p-4 border-b">
                                   <SheetTitle>Timeline View</SheetTitle>
                                 </SheetHeader>
@@ -550,3 +595,4 @@ export default function FileViewerPage() {
     );
 
     
+
