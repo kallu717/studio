@@ -378,7 +378,7 @@ export default function FileViewerPage() {
             </header>
 
             <main className="flex-grow flex flex-col min-h-0">
-                 <ResizablePanelGroup direction="vertical" className="flex-grow min-h-0">
+                 <ResizablePanelGroup direction="vertical" className="flex-grow">
                     <ResizablePanel defaultSize={showDetailView ? 60 : 100}>
                         <div className="flex flex-col h-full">
                             {error ? (
@@ -397,8 +397,8 @@ export default function FileViewerPage() {
                                     </span>
                                 </div>
                             ) : (
-                                <div className="flex-grow min-h-0 overflow-auto">
-                                    <Table className="table-fixed w-full">
+                                <div className="flex-grow min-h-0 overflow-y-auto">
+                                    <Table className="w-full">
                                         <TableHeader className="sticky top-0 bg-background z-10">
                                             <TableRow>
                                                 <TableHead className="w-16 px-2">
@@ -411,7 +411,7 @@ export default function FileViewerPage() {
                                                 </TableHead>
                                                 <TableHead className="w-20 font-mono">#</TableHead>
                                                 {headers.map((header) => (
-                                                    <TableHead key={header} className="capitalize">
+                                                    <TableHead key={header} className="capitalize max-w-[200px] truncate">
                                                         <div className="flex items-center gap-2">
                                                             {header.replace(/_/g, ' ')}
                                                             <ColumnFilter 
@@ -447,7 +447,7 @@ export default function FileViewerPage() {
                                                         {headers.map((header) => (
                                                             <TableCell 
                                                                 key={`${globalIndex}-${header}`} 
-                                                                className="truncate font-mono"
+                                                                className="font-mono max-w-[200px] truncate"
                                                                 title={log[header]}
                                                             >
                                                                 {log[header]}
@@ -591,8 +591,4 @@ export default function FileViewerPage() {
             />
         </div>
     );
-
-    
-
-
-
+}
