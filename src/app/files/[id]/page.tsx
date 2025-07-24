@@ -314,11 +314,11 @@ export default function FileViewerPage() {
                             Back
                         </Button>
                     </div>
-                    <div className="flex-1 flex items-baseline justify-center gap-4">
+                    <div className="flex-1 flex items-baseline justify-center gap-4 min-w-0">
                          <h1 className="text-xl font-bold text-foreground truncate">
                             {isLoading && !fileName ? 'Loading...' : `${fileName}`}
                          </h1>
-                         <p className="text-sm text-muted-foreground">
+                         <p className="text-sm text-muted-foreground whitespace-nowrap">
                             Audit Logs ({isLoading || isParsing ? '...' : allLogs.length.toLocaleString()} rows)
                          </p>
                     </div>
@@ -359,7 +359,7 @@ export default function FileViewerPage() {
                                 <TimelineView logs={filteredLogs} headers={headers} />
                             </SheetContent>
                         </Sheet>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="hidden md:flex items-center gap-4 text-xs text-muted-foreground">
                             <div className="flex items-center gap-1.5">
                                 <span className="h-3 w-3 rounded-full bg-green-400/80"></span>
                                 <span>Create</span>
@@ -397,82 +397,80 @@ export default function FileViewerPage() {
                                     </span>
                                 </div>
                             ) : (
-                                <div className="flex-grow min-h-0">
-                                    <ScrollArea className="h-full w-full whitespace-nowrap">
-                                        <Table>
-                                            <TableHeader className="sticky top-0 bg-background z-10">
-                                                <TableRow>
-                                                    <TableHead className="w-16">
-                                                        <Checkbox
-                                                            checked={isAllOnPageSelected ? true : (isSomeOnPageSelected ? 'indeterminate' : false)}
-                                                            onCheckedChange={handleSelectAll}
-                                                            aria-label="Select all rows on this page"
-                                                            disabled={paginatedLogs.length === 0}
-                                                        />
+                                <div className="flex-grow min-h-0 overflow-auto">
+                                    <Table className="table-fixed w-full">
+                                        <TableHeader className="sticky top-0 bg-background z-10">
+                                            <TableRow>
+                                                <TableHead className="w-16 px-2">
+                                                    <Checkbox
+                                                        checked={isAllOnPageSelected ? true : (isSomeOnPageSelected ? 'indeterminate' : false)}
+                                                        onCheckedChange={handleSelectAll}
+                                                        aria-label="Select all rows on this page"
+                                                        disabled={paginatedLogs.length === 0}
+                                                    />
+                                                </TableHead>
+                                                <TableHead className="w-20 font-mono">#</TableHead>
+                                                {headers.map((header) => (
+                                                    <TableHead key={header} className="capitalize">
+                                                        <div className="flex items-center gap-2">
+                                                            {header.replace(/_/g, ' ')}
+                                                            <ColumnFilter 
+                                                                header={header}
+                                                                filter={filters[header]}
+                                                                setFilter={setColumnFilter}
+                                                            />
+                                                        </div>
                                                     </TableHead>
-                                                    <TableHead className="w-20 font-mono">#</TableHead>
-                                                    {headers.map((header) => (
-                                                        <TableHead key={header} className="capitalize">
-                                                            <div className="flex items-center gap-2">
-                                                                {header.replace(/_/g, ' ')}
-                                                                <ColumnFilter 
-                                                                    header={header}
-                                                                    filter={filters[header]}
-                                                                    setFilter={setColumnFilter}
-                                                                />
-                                                            </div>
-                                                        </TableHead>
-                                                    ))}
-                                                    <TableHead className="w-20 text-center">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {paginatedLogs.map((log, index) => {
-                                                    const globalIndex = getGlobalIndex(index);
-                                                    const isSelected = globalIndex !== -1 && selectedRows.has(globalIndex);
-                                                    return (
-                                                        <TableRow
-                                                            key={globalIndex === -1 ? `fallback-${index}`: globalIndex}
-                                                            data-state={isSelected ? 'selected' : undefined}
-                                                            className={cn("cursor-pointer", getRowClass(log))}
-                                                            onClick={() => handleRowClick(index)}
-                                                        >
-                                                            <TableCell onClick={(e) => e.stopPropagation()}>
-                                                                <Checkbox
-                                                                    checked={isSelected}
-                                                                    onCheckedChange={(checked) => handleRowSelect(index, !!checked)}
-                                                                    aria-label={`Select row ${globalIndex + 1}`}
-                                                                />
+                                                ))}
+                                                <TableHead className="w-20 text-center">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {paginatedLogs.map((log, index) => {
+                                                const globalIndex = getGlobalIndex(index);
+                                                const isSelected = globalIndex !== -1 && selectedRows.has(globalIndex);
+                                                return (
+                                                    <TableRow
+                                                        key={globalIndex === -1 ? `fallback-${index}`: globalIndex}
+                                                        data-state={isSelected ? 'selected' : undefined}
+                                                        className={cn("cursor-pointer", getRowClass(log))}
+                                                        onClick={() => handleRowClick(index)}
+                                                    >
+                                                        <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
+                                                            <Checkbox
+                                                                checked={isSelected}
+                                                                onCheckedChange={(checked) => handleRowSelect(index, !!checked)}
+                                                                aria-label={`Select row ${globalIndex + 1}`}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell className="font-mono text-muted-foreground">{globalIndex + 1}</TableCell>
+                                                        {headers.map((header) => (
+                                                            <TableCell 
+                                                                key={`${globalIndex}-${header}`} 
+                                                                className="truncate font-mono"
+                                                                title={log[header]}
+                                                            >
+                                                                {log[header]}
                                                             </TableCell>
-                                                            <TableCell className="font-mono text-muted-foreground">{globalIndex + 1}</TableCell>
-                                                            {headers.map((header) => (
-                                                                <TableCell 
-                                                                    key={`${globalIndex}-${header}`} 
-                                                                    className="truncate font-mono max-w-xs"
-                                                                    title={log[header]}
-                                                                >
-                                                                    {log[header]}
-                                                                </TableCell>
-                                                            ))}
-                                                            <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleViewClick(e, log)}>
-                                                                    <Eye className="h-4 w-4" />
-                                                                    <span className="sr-only">View Details</span>
-                                                                </Button>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )
-                                                })}
-                                                {!paginatedLogs.length && (
-                                                    <TableRow>
-                                                        <TableCell colSpan={headers.length + 3} className="text-center py-10 text-muted-foreground">
-                                                            {hasActiveFilters ? "No logs match the current filters." : "The file is empty."}
+                                                        ))}
+                                                        <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleViewClick(e, log)}>
+                                                                <Eye className="h-4 w-4" />
+                                                                <span className="sr-only">View Details</span>
+                                                            </Button>
                                                         </TableCell>
                                                     </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </ScrollArea>
+                                                )
+                                            })}
+                                            {!paginatedLogs.length && (
+                                                <TableRow>
+                                                    <TableCell colSpan={headers.length + 3} className="text-center py-10 text-muted-foreground">
+                                                        {hasActiveFilters ? "No logs match the current filters." : "The file is empty."}
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
                                 </div>
                             )}
                              {!isLoading && !isParsing && allLogs.length > 0 && (
@@ -595,5 +593,6 @@ export default function FileViewerPage() {
     );
 
     
+
 
 
