@@ -84,15 +84,21 @@ export const LogDetailModal = ({ log, isOpen, onClose }: LogDetailModalProps) =>
         }));
 
       } else { // Handles 'update', 'delete', and others
-        const diffList = typeof log.difference_list === 'string' 
+        const diffListRaw = typeof log.difference_list === 'string' 
             ? (log.difference_list.trim() === '' || log.difference_list.toUpperCase() === 'NULL' ? [] : JSON.parse(log.difference_list))
             : log.difference_list;
 
-        if (!Array.isArray(diffList) || diffList.length === 0) return [];
+        if (!Array.isArray(diffListRaw) || diffListRaw.length === 0) return [];
+        
+        const transformedDifferences: Difference[] = diffListRaw.map(diff => ({
+            field: diff.field,
+            old_value: diff.oldValue, // Map from oldValue
+            new_value: diff.newValue  // Map from newValue
+        }));
 
         return [{
             entity_id: log.uuid || log.entity_id || "Changed Entity",
-            differences: diffList
+            differences: transformedDifferences
         }];
       }
     } catch (error) {
