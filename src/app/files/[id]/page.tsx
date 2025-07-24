@@ -305,7 +305,7 @@ export default function FileViewerPage() {
 
 
     return (
-        <div className="flex flex-col h-screen bg-gray-50">
+        <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
             <header className="flex-shrink-0 bg-background/80 backdrop-blur-sm border-b z-20">
                 <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-4">
@@ -411,7 +411,7 @@ export default function FileViewerPage() {
                                                 </TableHead>
                                                 <TableHead className="w-20 font-mono">#</TableHead>
                                                 {headers.map((header) => (
-                                                    <TableHead key={header} className="capitalize">
+                                                    <TableHead key={header} className="capitalize max-w-xs truncate">
                                                         <div className="flex items-center gap-2">
                                                             <span className="truncate">
                                                                 {header.replace(/_/g, ' ')}
@@ -449,7 +449,7 @@ export default function FileViewerPage() {
                                                         {headers.map((header) => (
                                                             <TableCell 
                                                                 key={`${globalIndex}-${header}`} 
-                                                                className="font-mono truncate"
+                                                                className="font-mono max-w-xs truncate"
                                                                 title={log[header]}
                                                             >
                                                                 {log[header]}
