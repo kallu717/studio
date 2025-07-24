@@ -398,7 +398,7 @@ export default function FileViewerPage() {
                                 </div>
                             ) : (
                                 <div className="flex-grow min-h-0 overflow-y-auto">
-                                    <Table className="w-full">
+                                    <Table className="w-full table-fixed">
                                         <TableHeader className="sticky top-0 bg-background z-10">
                                             <TableRow>
                                                 <TableHead className="w-16 px-2">
@@ -411,9 +411,11 @@ export default function FileViewerPage() {
                                                 </TableHead>
                                                 <TableHead className="w-20 font-mono">#</TableHead>
                                                 {headers.map((header) => (
-                                                    <TableHead key={header} className="capitalize max-w-[200px] truncate">
+                                                    <TableHead key={header} className="capitalize">
                                                         <div className="flex items-center gap-2">
-                                                            {header.replace(/_/g, ' ')}
+                                                            <span className="truncate">
+                                                                {header.replace(/_/g, ' ')}
+                                                            </span>
                                                             <ColumnFilter 
                                                                 header={header}
                                                                 filter={filters[header]}
@@ -422,7 +424,7 @@ export default function FileViewerPage() {
                                                         </div>
                                                     </TableHead>
                                                 ))}
-                                                <TableHead className="w-20 text-center">Actions</TableHead>
+                                                <TableHead className="w-24 text-center">Actions</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -447,7 +449,7 @@ export default function FileViewerPage() {
                                                         {headers.map((header) => (
                                                             <TableCell 
                                                                 key={`${globalIndex}-${header}`} 
-                                                                className="font-mono max-w-[200px] truncate"
+                                                                className="font-mono truncate"
                                                                 title={log[header]}
                                                             >
                                                                 {log[header]}
