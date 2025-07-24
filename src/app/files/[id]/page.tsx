@@ -398,7 +398,7 @@ export default function FileViewerPage() {
                                 </div>
                             ) : (
                                 <div className="flex-grow min-h-0">
-                                    <ScrollArea className="h-full">
+                                    <ScrollArea className="h-full w-full whitespace-nowrap">
                                         <Table>
                                             <TableHeader className="sticky top-0 bg-background z-10">
                                                 <TableRow>
@@ -595,4 +595,5 @@ export default function FileViewerPage() {
     );
 
     
+
 
