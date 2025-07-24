@@ -380,7 +380,7 @@ export default function FileViewerPage() {
             <main className="flex-grow flex flex-col min-h-0">
                  <ResizablePanelGroup direction="vertical" className="flex-grow">
                     <ResizablePanel defaultSize={showDetailView ? 60 : 100}>
-                        <div className="flex flex-col h-full">
+                        <div className="h-full flex flex-col">
                             {error ? (
                                  <Alert variant="destructive" className="my-4 mx-6">
                                     <Terminal className="h-4 w-4" />
@@ -398,7 +398,7 @@ export default function FileViewerPage() {
                                 </div>
                             ) : (
                                 <div className="flex-grow min-h-0 overflow-y-auto">
-                                    <Table className="w-full table-fixed">
+                                    <Table>
                                         <TableHeader className="sticky top-0 bg-background z-10">
                                             <TableRow>
                                                 <TableHead className="w-16 px-2">
